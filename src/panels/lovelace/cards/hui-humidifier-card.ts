@@ -27,6 +27,7 @@ import { hasConfigOrEntityChanged } from "../common/has-changed";
 import { createEntityNotFoundWarning } from "../components/hui-warning";
 import { LovelaceCard, LovelaceCardEditor } from "../types";
 import { HumidifierCardConfig } from "./types";
+import { computeStateDisplay } from "../../../common/entity/compute_state_display";
 
 @customElement("hui-humidifier-card")
 export class HuiHumidifierCard extends LitElement implements LovelaceCard {
@@ -132,7 +133,13 @@ export class HuiHumidifierCard extends LitElement implements LovelaceCard {
     const currentMode = html`
       <svg viewBox="0 0 40 10" id="humidity">
         <text x="50%" y="50%" text-anchor="middle" id="set-mode">
-          ${this.hass!.localize(`state.default.${stateObj.state}`)}
+          ${computeStateDisplay(
+            this.hass.localize,
+            stateObj,
+            this.hass.locale,
+            this.hass.config,
+            this.hass.entities
+          )}
           ${stateObj.attributes.mode && !isUnavailableState(stateObj.state)
             ? html`
                 -
