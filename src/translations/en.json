@@ -985,6 +985,9 @@
           "open": "Open",
           "lock": "Lock",
           "unlock": "Unlock"
+        },
+        "humidifier": {
+          "toggle": "Toggle"
         }
       },
       "entity_registry": {

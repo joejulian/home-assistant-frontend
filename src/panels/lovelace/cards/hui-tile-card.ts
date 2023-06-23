@@ -60,6 +60,7 @@ import {
 import { HuiErrorCard } from "./hui-error-card";
 import { computeTileBadge } from "./tile/badges/tile-badge";
 import { ThermostatCardConfig, TileCardConfig } from "./types";
+import { HumidifierEntity } from "../../../data/humidifier";
 
 const TIMESTAMP_STATE_DOMAINS = ["button", "input_button", "scene"];
 
@@ -221,6 +222,15 @@ export class HuiTileCard extends LitElement implements LovelaceCard {
       );
       if (speedStateDisplay) {
         return speedStateDisplay;
+      }
+    }
+
+    if (domain === "humidifier" && stateActive(stateObj)) {
+      const humidity = (stateObj as HumidifierEntity).attributes.humidity;
+      if (humidity) {
+        return `${Math.round(humidity)}${blankBeforePercent(
+          this.hass!.locale
+        )}%`;
       }
     }
 
