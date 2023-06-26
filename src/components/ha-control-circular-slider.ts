@@ -506,12 +506,12 @@ export class HaControlCircularSlider extends LitElement {
                   <line 
                     x1=${RADIUS - 12} 
                     y1="0" 
-                    x2=${RADIUS - 15} 
+                    x2=${RADIUS + 12} 
                     y2="0" 
                     stroke-width="4" 
                   />
                   <line
-                    x1=${RADIUS - 15}
+                    x1=${RADIUS + 10}
                     y1="0"
                     x2=${RADIUS - 20}
                     y2="0"
