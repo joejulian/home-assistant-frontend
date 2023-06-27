@@ -104,6 +104,17 @@ export class HuiThermostatCard extends LitElement implements LovelaceCard {
     this._config = config;
   }
 
+  private _formatSetTemp(temp: number) {
+    return this._stepSize === 1
+      ? formatNumber(temp, this.hass!.locale, {
+          maximumFractionDigits: 0,
+        })
+      : formatNumber(temp, this.hass!.locale, {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        });
+  }
+
   protected render() {
     if (!this.hass || !this._config) {
       return nothing;
@@ -156,30 +167,50 @@ export class HuiThermostatCard extends LitElement implements LovelaceCard {
             ></round-slider>
           `;
 
-    const currentTemperature = svg`
-        <svg viewBox="0 0 40 20">
-          <text
-            x="50%"
-            dx="1"
-            y="60%"
-            text-anchor="middle"
-            style="font-size: 13px;"
-          >
-            ${
-              stateObj.attributes.current_temperature !== null &&
-              !isNaN(stateObj.attributes.current_temperature)
-                ? svg`${formatNumber(
-                    stateObj.attributes.current_temperature,
-                    this.hass.locale
-                  )}
-            <tspan dx="-3" dy="-6.5" style="font-size: 4px;">
-              ${this.hass.config.unit_system.temperature}
-            </tspan>`
-                : ""
-            }
-          </text>
-        </svg>
-      `;
+    const currentTemp =
+      stateObj.attributes.current_temperature != null &&
+      !isNaN(stateObj.attributes.current_temperature)
+        ? formatNumber(
+            stateObj.attributes.current_temperature,
+            this.hass.locale
+          )
+        : undefined;
+
+    const setTempLow =
+      this._setTemp != null && Array.isArray(this._setTemp)
+        ? this._formatSetTemp(this._setTemp[0])
+        : undefined;
+
+    const setTempHigh =
+      this._setTemp != null && Array.isArray(this._setTemp)
+        ? this._formatSetTemp(this._setTemp[1])
+        : undefined;
+
+    const setTemp =
+      this._setTemp != null && !Array.isArray(this._setTemp)
+        ? this._formatSetTemp(this._setTemp)
+        : undefined;
+
+    const currentTemperature = html`
+      <svg viewBox="0 0 40 20">
+        <text
+          x="50%"
+          dx="1"
+          y="60%"
+          text-anchor="middle"
+          style="font-size: 13px;"
+        >
+          ${currentTemp != null
+            ? svg`
+                  ${currentTemp}
+                  <tspan dx="-3" dy="-6.5" style="font-size: 4px;">
+                    ${this.hass.config.unit_system.temperature}
+                  </tspan>
+                `
+            : nothing}
+        </text>
+      </svg>
+    `;
 
     const setValues = svg`
       <svg id="set-values">
@@ -188,40 +219,9 @@ export class HuiThermostatCard extends LitElement implements LovelaceCard {
             ${
               stateObj.state === UNAVAILABLE
                 ? this.hass.localize("state.default.unavailable")
-                : this._setTemp === undefined || this._setTemp === null
-                ? ""
-                : Array.isArray(this._setTemp)
-                ? this._stepSize === 1
-                  ? svg`
-                      ${formatNumber(this._setTemp[0], this.hass.locale, {
-                        maximumFractionDigits: 0,
-                      })} -
-                      ${formatNumber(this._setTemp[1], this.hass.locale, {
-                        maximumFractionDigits: 0,
-                      })}
-                      `
-                  : svg`
-                      ${formatNumber(this._setTemp[0], this.hass.locale, {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      })} -
-                      ${formatNumber(this._setTemp[1], this.hass.locale, {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      })}
-                      `
-                : this._stepSize === 1
-                ? svg`
-                      ${formatNumber(this._setTemp, this.hass.locale, {
-                        maximumFractionDigits: 0,
-                      })}
-                      `
-                : svg`
-                      ${formatNumber(this._setTemp, this.hass.locale, {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      })}
-                      `
+                : setTemp || (setTempLow && setTempHigh)
+                ? setTemp || `${setTempLow} - ${setTempHigh}`
+                : ""
             }
           </text>
           <text
